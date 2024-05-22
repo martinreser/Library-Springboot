@@ -1,38 +1,28 @@
 package com.libreria.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter @Setter
+@Entity(name = "book")
+@Table(name = "BOOKS")
 public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_book", nullable = false)
+    private int id;
+
+    @Column(name = "name_book", nullable = false)
     private String name;
+
+    @Column(name = "name_author", nullable = false)
     private String author;
+
+    @Column(name = "year_release")
     private String yearRelease;
-
-    public Book(String name, String author, String yearRelease) {
-        this.name = name;
-        this.author = author;
-        this.yearRelease = yearRelease;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public String getYearRelease() {
-        return yearRelease;
-    }
-
-    public void setYearRelease(String yearRelease) {
-        this.yearRelease = yearRelease;
-    }
 }
