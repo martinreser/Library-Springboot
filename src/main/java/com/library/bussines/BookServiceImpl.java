@@ -4,11 +4,14 @@ import com.library.dto.BookDto;
 import com.library.model.Author;
 import com.library.model.Book;
 import com.library.persistence.BookRepository;
+import com.library.persistence.exception.BookAlreadyExistsException;
 import com.library.persistence.exception.NoValidParamsException;
 import com.library.persistence.exception.ResourceNotFoundException;
 import com.library.util.BookSpecification;
 import com.library.util.FormatString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,7 @@ public class BookServiceImpl implements BookService {
     private AuthorService authorService;
 
     @Override
-    public Book saveBook(BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException {
+    public Book saveBook(BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException, BookAlreadyExistsException {
         final Book newBook = new Book();
         final Optional<Author> author = authorService.getAuthorById(bookDto.getAuthorId());
         if (author.isEmpty())
@@ -40,6 +43,8 @@ public class BookServiceImpl implements BookService {
         newBook.setName(FormatString.f(bookDto.getName()));
         newBook.setAuthor(author.get());
         newBook.setYearRelease(bookDto.getYearRelease());
+        if (booksExist(newBook))
+            throw new BookAlreadyExistsException("Already exist a book with the same name, author and year release.");
         return bookRepository.save(newBook);
     }
 
@@ -123,5 +128,10 @@ public class BookServiceImpl implements BookService {
         catch (NumberFormatException n){}
         if (year > nowYear || year < 0) return false;
         return true;
+    }
+
+    private boolean booksExist(Book book){
+        Specification<Book> specification = BookSpecification.alreadyExist(book.getAuthor().getId(), book.getName(), book.getYearRelease());
+        return !bookRepository.findAll(specification).isEmpty();
     }
 }

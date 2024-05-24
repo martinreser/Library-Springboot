@@ -3,6 +3,7 @@ package com.library.controller;
 import com.library.bussines.BookService;
 import com.library.dto.BookDto;
 import com.library.model.Book;
+import com.library.persistence.exception.BookAlreadyExistsException;
 import com.library.util.ErrorDetails;
 import com.library.persistence.exception.NoValidParamsException;
 import com.library.persistence.exception.ResourceNotFoundException;
@@ -35,7 +36,10 @@ public class BookController {
         }
         catch (NoValidParamsException e) {
             ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), e.getMessage(), "Invalid params");
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        } catch (BookAlreadyExistsException e) {
+            ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), e.getMessage(), "Can´t create");
+            return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
         }
     }
 
