@@ -1,7 +1,7 @@
-package com.libreria.util;
+package com.library.util;
 
-import com.libreria.model.Author;
-import com.libreria.model.Book;
+import com.library.model.Author;
+import com.library.model.Book;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
 import org.springframework.data.jpa.domain.Specification;

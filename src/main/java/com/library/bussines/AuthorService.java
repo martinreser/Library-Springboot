@@ -1,7 +1,6 @@
-package com.libreria.bussines;
+package com.library.bussines;
 
-import com.libreria.model.Author;
-import org.springframework.stereotype.Service;
+import com.library.model.Author;
 
 import java.util.List;
 import java.util.Optional;

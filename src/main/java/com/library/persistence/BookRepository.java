@@ -1,6 +1,6 @@
-package com.libreria.persistence;
+package com.library.persistence;
 
-import com.libreria.model.Book;
+import com.library.model.Book;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

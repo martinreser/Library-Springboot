@@ -1,7 +1,7 @@
-package com.libreria.bussines;
+package com.library.bussines;
 
-import com.libreria.model.Author;
-import com.libreria.persistence.AuthorRepository;
+import com.library.model.Author;
+import com.library.persistence.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,22 +16,12 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<Author> getAllAuthors() {
-        final List<Author> authors = authorRepository.findAll();
-        for (Author author: authors) {
-            setAgeAuthor(author);
-        }
-        return authors;
+        return authorRepository.findAll();
     }
 
     @Override
     public Optional<Author> getAuthorById(int id) {
         final Optional<Author> author = authorRepository.findById(id);
-        author.get().setAge();
-        return author;
-    }
-
-    private Author setAgeAuthor(Author author){
-        author.setAge();
         return author;
     }
 }

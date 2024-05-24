@@ -1,4 +1,4 @@
-package com.libreria.model;
+package com.library.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,7 +14,6 @@ import java.time.Period;
 import java.util.List;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter @Setter
 @Entity(name = "author")
 @Table(name = "AUTHORS")
@@ -46,15 +45,11 @@ public class Author {
     @Transient()
     private Integer age;
 
-    public void setAge() {
-        if (dateOfBirth == null) {
-            this.age = null;
-            return;
+    public Integer getAge() {
+        if (dateOfBirth != null) {
+            return Period.between(dateOfBirth, LocalDate.now()).getYears();
+        } else {
+            return null;
         }
-        LocalDate currentDate = LocalDate.now();
-        this.age = Period.between(dateOfBirth, currentDate).getYears();
     }
-
-
-
 }

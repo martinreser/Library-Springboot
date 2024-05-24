@@ -1,7 +1,7 @@
-package com.libreria.controller;
+package com.library.controller;
 
-import com.libreria.bussines.AuthorService;
-import com.libreria.model.Author;
+import com.library.bussines.AuthorService;
+import com.library.model.Author;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +18,7 @@ public class AuthorController {
     @Autowired
     AuthorService authorService;
 
-    @GetMapping("")
+    @GetMapping("/")
     public List<Author> getAllAuthors(){
         return authorService.getAllAuthors();
     }

@@ -1,4 +1,4 @@
-package com.libreria.util;
+package com.library.util;
 
 public class FormatString {
 
