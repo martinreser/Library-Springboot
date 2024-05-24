@@ -1,5 +1,8 @@
 package com.libreria.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,12 +11,16 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
 @Entity(name = "author")
 @Table(name = "AUTHORS")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,15 +39,20 @@ public class Author {
     @Column(name = "nacionality_author", nullable = false)
     private String nacionality;
 
-    @Transient()
-    private int age = calculateAge();
+    @OneToMany(mappedBy = "author")
+    @JsonIgnoreProperties({"author"})
+    private List<Book> books;
 
-    private int calculateAge() {
+    @Transient()
+    private Integer age;
+
+    public void setAge() {
         if (dateOfBirth == null) {
-            return 0;
+            this.age = null;
+            return;
         }
         LocalDate currentDate = LocalDate.now();
-        return Period.between(dateOfBirth, currentDate).getYears();
+        this.age = Period.between(dateOfBirth, currentDate).getYears();
     }
 
 

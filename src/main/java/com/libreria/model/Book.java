@@ -1,5 +1,9 @@
 package com.libreria.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +15,9 @@ import lombok.Setter;
 @Getter @Setter
 @Entity(name = "book")
 @Table(name = "BOOKS")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +27,10 @@ public class Book {
     @Column(name = "name_book", nullable = false)
     private String name;
 
-    @Column(name = "name_author", nullable = false)
-    private String author;
+    @ManyToOne
+    @JoinColumn(name = "id_author")
+    @JsonIgnoreProperties({"dateOfBirth", "age", "nacionality", "books"})
+    private Author author;
 
     @Column(name = "year_release")
     private String yearRelease;

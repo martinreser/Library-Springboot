@@ -11,7 +11,7 @@ public interface BookService {
     Book saveBook(BookDto bookDto);
     List<Book> findBooks();
     Optional<Book> findBookById(int id);
-    List<Book> findBooksByAuthor(String author, String sortBy);
+    List<Book> findBooksByAuthor(int author, String sortBy);
     List<Book> findBooksByYear(String author, String sortBy);
     Optional<Book> updateBookById(int id, BookDto bookDto);
     String deleteBookById(int id);

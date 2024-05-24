@@ -37,12 +37,12 @@ public class BookController {
     }
 
     @GetMapping("/author/{author}")
-    public List<Book> getBooksByAuthor(@PathVariable String author, @RequestParam String sortBy){
+    public List<Book> getBooksByAuthor(@PathVariable int author, @RequestParam(required = false) String sortBy){
         return bookService.findBooksByAuthor(author, sortBy);
     }
 
     @GetMapping("/year/{year}")
-    public List<Book> getBooksByYear(@PathVariable String year, @RequestParam String sortBy){
+    public List<Book> getBooksByYear(@PathVariable String year, @RequestParam(required = false) String sortBy){
         return bookService.findBooksByYear(year, sortBy);
     }
 

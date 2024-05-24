@@ -2,7 +2,7 @@ package com.libreria.dto;
 
 public class BookDto {
     private String nameBook;
-    private String authorBook;
+    private int authorBook;
     private String yearBook;
 
     public String getNameBook() {
@@ -13,11 +13,11 @@ public class BookDto {
         this.nameBook = nameBook;
     }
 
-    public String getAuthorBook() {
+    public int getAuthorBook() {
         return authorBook;
     }
 
-    public void setAuthorBook(String authorBook) {
+    public void setAuthorBook(int authorBook) {
         this.authorBook = authorBook;
     }
 

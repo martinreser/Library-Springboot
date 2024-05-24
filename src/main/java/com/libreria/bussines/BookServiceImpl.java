@@ -1,19 +1,23 @@
 package com.libreria.bussines;
 
 import com.libreria.dto.BookDto;
+import com.libreria.model.Author;
 import com.libreria.model.Book;
 import com.libreria.persistence.BookRepository;
+import com.libreria.util.BookSpecification;
 import com.libreria.util.FormatString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.text.Format;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -22,11 +26,15 @@ public class BookServiceImpl implements BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private AuthorService authorService;
+
     @Override
     public Book saveBook(BookDto bookDto) {
         final Book newBook = new Book();
-        newBook.setName(bookDto.getNameBook());
-        newBook.setAuthor(bookDto.getAuthorBook());
+        final Author author = authorService.getAuthorById(bookDto.getAuthorBook()).get();
+        newBook.setName(FormatString.f(bookDto.getNameBook()));
+        newBook.setAuthor(author);
         newBook.setYearRelease(bookDto.getYearBook());
         return bookRepository.save(newBook);
     }
@@ -42,40 +50,33 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<Book> findBooksByAuthor(String author, String sortBy) {
-        final Book bookSearch = new Book();
-        bookSearch.setAuthor(author);
+    public List<Book> findBooksByAuthor(int authorId, String sortBy) {
+        sortBy = sortBy != null ? sortBy : "name";
+        Specification<Book> specification = BookSpecification.hasAuthor(authorId);
 
-        final ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnorePaths("name", "yearRelease", "id")
-                .withMatcher("author", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
-
-        final Example<Book> example = Example.of(bookSearch, matcher);
-
-        return bookRepository.findAll(example, Sort.by(Sort.Direction.ASC, sortBy));
+        return bookRepository.findAll(specification, Sort.by(Sort.Direction.ASC, sortBy));
     }
 
     @Override
     public List<Book> findBooksByYear(String year, String sortBy) {
-        final Book bookSearch = new Book();
-        bookSearch.setYearRelease(year);
+        sortBy = sortBy != null ? sortBy : "name";
+        Specification<Book> specification = BookSpecification.hasYear(year);
 
-        final ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnorePaths("name", "author", "id")
-                .withMatcher("yearRelease", ExampleMatcher.GenericPropertyMatchers.exact());
 
-        final Example<Book> example = Example.of(bookSearch, matcher);
-
-        return bookRepository.findAll(example, Sort.by(Sort.Direction.ASC, sortBy));
+        return bookRepository.findAll(specification, Sort.by(Sort.Direction.ASC, sortBy));
     }
 
     @Override
     public Optional<Book> updateBookById(int id, BookDto bookDto) {
         final Optional<Book> bookToUpdate = bookRepository.findById(id);
+        Optional<Author> authorToUpdate = null;
+        if (bookToUpdate.get().getAuthor().getId() != id){
+            authorToUpdate = authorService.getAuthorById(id);
+        }
         if (isValidString(bookDto.getNameBook()))
             bookToUpdate.get().setName(FormatString.f(bookDto.getNameBook()));
-        if (isValidString(bookDto.getAuthorBook()) & !bookDto.getAuthorBook().matches(".*\\d+.*"))
-            bookToUpdate.get().setAuthor(FormatString.f(bookDto.getAuthorBook()));
+        if (authorToUpdate.get() != null)
+            bookToUpdate.get().setAuthor(authorToUpdate.get());
         if (isValidYear(bookDto.getYearBook()))
             bookToUpdate.get().setYearRelease(bookDto.getYearBook());
         bookRepository.save(bookToUpdate.get());
