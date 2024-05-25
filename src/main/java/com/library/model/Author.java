@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -36,7 +36,7 @@ public class Author {
     private LocalDate dateOfBirth;
 
     @Column(name = "nacionality_author", nullable = false)
-    private String nacionality;
+    private String nationality;
 
     @OneToMany(mappedBy = "author")
     @JsonIgnoreProperties({"author"})
@@ -50,6 +50,14 @@ public class Author {
             return Period.between(dateOfBirth, LocalDate.now()).getYears();
         } else {
             return null;
+        }
+    }
+
+    public List<Book> getBooks() {
+        if (books != null) {
+            return books;
+        } else {
+            return new ArrayList<>();
         }
     }
 }

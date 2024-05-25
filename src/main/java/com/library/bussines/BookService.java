@@ -11,13 +11,12 @@ import java.util.Optional;
 
 public interface BookService {
     Book saveBook(BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException, BookAlreadyExistsException;
-    List<Book> findBooks();
+    List<Book> findBooks() throws ResourceNotFoundException;
     Optional<Book> findBookById(int id) throws ResourceNotFoundException;
-    List<Book> findBooksByAuthor(int author, String sortBy);
-    List<Book> findBooksByYear(String author, String sortBy);
-    Optional<Book> updateBookById(int id, BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException;
+    List<Book> findBooksByParams(String sortBy, String name, Integer authorId, String yearRelease) throws ResourceNotFoundException;
+    Book updateBookById(int id, BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException;
     void deleteBookById(int id) throws ResourceNotFoundException;
-    void deleteAllBooks();
+    void deleteBooks();
 
 
 
