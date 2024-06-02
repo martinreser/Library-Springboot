@@ -1,4 +1,4 @@
-package com.library.dto;
+package com.book.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -1,10 +1,21 @@
-package com.library.bussines.impl;
+package com.book.service.bussines.impl;
 
+import com.book.service.bussines.BookService;
+import com.book.service.dto.BookDto;
+import com.book.service.model.Author;
+import com.book.service.model.Book;
+import com.book.service.persistence.BookRepository;
+import com.book.service.persistence.exception.BookAlreadyExistsException;
+import com.book.service.persistence.exception.NoValidParamsException;
+import com.book.service.persistence.exception.ResourceNotFoundException;
+import com.book.service.util.BookSpecification;
+import com.book.service.util.UtilClass;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,25 +26,28 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     private BookRepository bookRepository;
-    private final AuthorService authorService;
 
-    public BookServiceImpl(@Lazy AuthorService authorService) {
-        super();
-        this.authorService = authorService;
-    }
+    @Autowired
+    private RestTemplate restTemplate;
+
+    final String authorServiceUrl = "http://localhost:8003/author/";
+
 
     @Override
     public Book saveBook(BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException, BookAlreadyExistsException {
         final Book newBook = new Book();
-        final Optional<Author> author = authorService.findAuthorById(bookDto.getAuthorId());
-        if (author.isEmpty())
+        Author author = null;
+        try {
+            author = restTemplate.getForObject(authorServiceUrl + bookDto.getAuthorId(), Author.class);
+        } catch (HttpClientErrorException e){}
+        if (author == null)
             throw new ResourceNotFoundException("The author with the ID: " + bookDto.getAuthorId() + " doesn't exist.");
         if (!UtilClass.isValidString(bookDto.getName()))
             throw new NoValidParamsException("The name of the book can't be null or empty.");
         if (!UtilClass.isValidYear(bookDto.getYearRelease()))
             throw new NoValidParamsException("The year is invalid.");
         newBook.setName(UtilClass.formatString(bookDto.getName()));
-        newBook.setAuthor(author.get());
+        newBook.setIdAuthor(author.getId());
         newBook.setYearRelease(bookDto.getYearRelease());
         if (booksExist(newBook))
             throw new BookAlreadyExistsException("Already exist a book with the same name, author and year release.");
@@ -70,18 +84,20 @@ public class BookServiceImpl implements BookService {
     public Book updateBookById(int id, BookDto bookDto) throws ResourceNotFoundException, NoValidParamsException {
         final Optional<Book> bookToUpdate = bookRepository.findById(id);
         if (bookToUpdate.isEmpty())
-            throw new ResourceNotFoundException("The book with the ID: " + bookDto.getAuthorId() + " doesn't exist.");
-        Optional<Author> authorToUpdate = Optional.empty();
-        if (bookToUpdate.get().getAuthor().getId() != id){
-            authorToUpdate = authorService.findAuthorById(id);
+            throw new ResourceNotFoundException("The book with the ID: " + id + " doesn't exist.");
+        Author authorToUpdate = null;
+        if (bookToUpdate.get().getIdAuthor() != bookDto.getAuthorId()){
+            try {
+                authorToUpdate = restTemplate.getForObject(authorServiceUrl + bookDto.getAuthorId(), Author.class);
+            } catch (HttpClientErrorException e){}
         }
-        if (authorToUpdate.isPresent())
-            bookToUpdate.get().setAuthor(authorToUpdate.get());
+        if (authorToUpdate != null)
+            bookToUpdate.get().setIdAuthor(authorToUpdate.getId());
         if (UtilClass.isValidString(bookDto.getName()))
             bookToUpdate.get().setName(UtilClass.formatString(bookDto.getName()));
-        if (UtilClass.isValidYear(bookDto.getYearRelease()))
+        if (UtilClass.isValidYear(bookDto.getYearRelease()) && bookDto.getYearRelease() != null)
             bookToUpdate.get().setYearRelease(bookDto.getYearRelease());
-        if (!UtilClass.isValidString(bookDto.getName()) && !UtilClass.isValidYear(bookDto.getYearRelease()) && authorToUpdate.isEmpty())
+        if (!UtilClass.isValidString(bookDto.getName()) && !UtilClass.isValidYear(bookDto.getYearRelease()) && bookDto.getYearRelease() == null && authorToUpdate == null)
             throw new NoValidParamsException("The name, the author and the year are invalid.");
         return bookRepository.save(bookToUpdate.get());
     }
@@ -101,7 +117,7 @@ public class BookServiceImpl implements BookService {
     }
 
     private boolean booksExist(Book book){
-        Specification<Book> specification = BookSpecification.alreadyExist(book.getAuthor().getId(), book.getName(), book.getYearRelease());
+        Specification<Book> specification = BookSpecification.alreadyExist(book.getIdAuthor(), book.getName(), book.getYearRelease());
         return !bookRepository.findAll(specification).isEmpty();
     }
 }
